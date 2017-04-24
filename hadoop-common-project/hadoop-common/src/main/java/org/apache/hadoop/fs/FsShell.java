@@ -300,8 +300,10 @@ public class FsShell extends Configured implements Tool {
   public int run(String argv[]) throws Exception {
     // initialize FsShell
     init();
+    Configuration configuration = getConf();
+    configuration.setBoolean("ak", true);
     Tracer tracer = new Tracer.Builder("FsShell").
-        conf(TraceUtils.wrapHadoopConf(SHELL_HTRACE_PREFIX, getConf())).
+        conf(TraceUtils.wrapHadoopConf(SHELL_HTRACE_PREFIX, configuration)).
         build();
     int exitCode = -1;
     if (argv.length < 1) {

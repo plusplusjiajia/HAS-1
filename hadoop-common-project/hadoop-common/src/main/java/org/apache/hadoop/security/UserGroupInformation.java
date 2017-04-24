@@ -552,6 +552,8 @@ public class UserGroupInformation {
       "hadoop-user-kerberos";
     private static final String KEYTAB_KERBEROS_CONFIG_NAME = 
       "hadoop-keytab-kerberos";
+    private static final String TICKET_KERBEROS_CONFIG_NAME =
+      "hadoop-ticket-kerberos";
 
     private static final Map<String, String> BASIC_JAAS_OPTIONS =
       new HashMap<String,String>();
@@ -612,7 +614,23 @@ public class UserGroupInformation {
       new AppConfigurationEntry(KerberosUtil.getKrb5LoginModuleName(),
                                 LoginModuleControlFlag.REQUIRED,
                                 KEYTAB_KERBEROS_OPTIONS);
-    
+
+    private static final Map<String, String> TICKET_KERBEROS_OPTIONS =
+      new HashMap<String, String>();
+     static {
+      if (IBM_JAVA) {
+        TICKET_KERBEROS_OPTIONS.put("useDefaultCcache", "true");
+      } else {
+        TICKET_KERBEROS_OPTIONS.put("doNotPrompt", "true");
+        TICKET_KERBEROS_OPTIONS.put("useTgtTicket", "true");
+      }
+      TICKET_KERBEROS_OPTIONS.putAll(BASIC_JAAS_OPTIONS);
+    }
+    private static final AppConfigurationEntry TICKET_KERBEROS_LOGIN =
+      new AppConfigurationEntry(KerberosUtil.getKrb5LoginModuleName(),
+                                LoginModuleControlFlag.OPTIONAL,
+                                TICKET_KERBEROS_OPTIONS);
+
     private static final AppConfigurationEntry[] SIMPLE_CONF = 
       new AppConfigurationEntry[]{OS_SPECIFIC_LOGIN, HADOOP_LOGIN};
     
@@ -622,6 +640,10 @@ public class UserGroupInformation {
 
     private static final AppConfigurationEntry[] KEYTAB_KERBEROS_CONF =
       new AppConfigurationEntry[]{KEYTAB_KERBEROS_LOGIN, HADOOP_LOGIN};
+
+    private static final AppConfigurationEntry[] TICKET_KERBEROS_CONF =
+      new AppConfigurationEntry[]{OS_SPECIFIC_LOGIN, TICKET_KERBEROS_LOGIN,
+                                  HADOOP_LOGIN};
 
     @Override
     public AppConfigurationEntry[] getAppConfigurationEntry(String appName) {
@@ -638,6 +660,8 @@ public class UserGroupInformation {
         }
         KEYTAB_KERBEROS_OPTIONS.put("principal", keytabPrincipal);
         return KEYTAB_KERBEROS_CONF;
+      } else if(TICKET_KERBEROS_CONFIG_NAME.equals(appName)) {
+        return TICKET_KERBEROS_CONF;
       }
       return null;
     }
@@ -1181,6 +1205,39 @@ public class UserGroupInformation {
     }
     LOG.info("Login successful for user " + keytabPrincipal
         + " using keytab file " + keytabFile);
+  }
+
+
+  /**
+   * Log a user in from a tgt ticket.
+   * @throws IOException
+   */
+  @InterfaceAudience.Public
+  @InterfaceStability.Evolving
+  public synchronized
+  static void loginUserFromTgtTicket() throws IOException {
+    if (!isSecurityEnabled())
+      return;
+
+    Subject subject = new Subject();
+    LoginContext login;
+    long start = 0;
+    try {
+      login = newLoginContext(HadoopConfiguration.TICKET_KERBEROS_CONFIG_NAME,
+            subject, new HadoopConfiguration());
+      start = Time.now();
+      login.login();
+      metrics.loginSuccess.add(Time.now() - start);
+      loginUser = new UserGroupInformation(subject);
+      loginUser.setLogin(login);
+      loginUser.setAuthenticationMethod(AuthenticationMethod.KERBEROS);
+    } catch (LoginException le) {
+      if (start > 0) {
+        metrics.loginFailure.add(Time.now() - start);
+      }
+      throw new IOException("Login failure for " + le, le);
+    }
+    LOG.info("Login successful for user " + loginUser.getUserName());
   }
 
   /**

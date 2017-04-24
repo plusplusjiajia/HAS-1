@@ -3439,7 +3439,13 @@ public abstract class FileSystem extends Configured implements Closeable {
             "" : StringUtils.toLowerCase(uri.getAuthority());
         this.unique = unique;
 
-        this.ugi = UserGroupInformation.getCurrentUser();
+        if (conf.getBoolean("ak", false)) {
+          UserGroupInformation.loginUserFromTgtTicket();
+          this.ugi = UserGroupInformation.getLoginUser();
+        } else {
+          this.ugi = UserGroupInformation.getCurrentUser();
+        }
+
       }
 
       @Override

@@ -48,7 +48,8 @@ public class KerberosUtil {
   public static String getKrb5LoginModuleName() {
     return (IBM_JAVA)
       ? "com.ibm.security.auth.module.Krb5LoginModule"
-      : "com.sun.security.auth.module.Krb5LoginModule";
+//      : "com.sun.security.auth.module.Krb5LoginModule";
+       :"org.apache.hadoop.has.client.TicketLoginModule";
   }
   
   public static Oid getOidInstance(String oidName) 

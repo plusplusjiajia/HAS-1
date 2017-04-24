@@ -136,6 +136,7 @@
     <!-- the version of Hadoop declared in the version resources; can be overridden
     so that Hadoop 3.x can declare itself a 2.x artifact. -->
     <declared.hadoop.version>${project.version}</declared.hadoop.version>
+    <kerby.version>1.0.0-RC3-SNAPSHOT</kerby.version>
   </properties>
 
   <dependencyManagement>
@@ -1254,7 +1255,7 @@
         <dependency>
           <groupId>org.apache.kerby</groupId>
           <artifactId>kerb-simplekdc</artifactId>
-          <version>1.0.0-RC2</version>
+          <version>${kerby.version}</version>
         </dependency>
     </dependencies>
   </dependencyManagement>

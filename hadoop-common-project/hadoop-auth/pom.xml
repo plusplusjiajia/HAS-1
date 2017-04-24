@@ -181,6 +181,11 @@
       <version>${apacheds.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-has-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

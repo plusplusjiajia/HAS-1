@@ -15,27 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.hadoop.hdfs.server.balancer;
 
-package org.apache.hadoop.fs.swift.http;
-
-import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
+import org.junit.Test;
 
 /**
- * Implementation for SwiftRestClient to make copy requests.
- * COPY is a method that came with WebDAV (RFC2518), and is not something that
- * can be handled by all proxies en-route to a filesystem.
+ * The Balancer ensures that it disperses RPCs to the NameNode
+ * in order to avoid NN's RPC queue saturation.
  */
-class CopyMethod extends EntityEnclosingMethod {
+public class TestBalancerRPCDelay {
 
-  public CopyMethod(String uri) {
-    super(uri);
-  }
-
-  /**
-   * @return http method name
-   */
-  @Override
-  public String getName() {
-    return "COPY";
+  @Test(timeout=100000)
+  public void testBalancerRPCDelay() throws Exception {
+    new TestBalancer().testBalancerRPCDelay();
   }
 }

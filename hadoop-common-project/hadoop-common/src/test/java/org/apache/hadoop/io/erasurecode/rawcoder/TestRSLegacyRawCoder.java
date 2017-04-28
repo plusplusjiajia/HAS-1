@@ -22,12 +22,12 @@ import org.junit.Before;
 /**
  * Test the legacy raw Reed-solomon coder implemented in Java.
  */
-public class TestRSRawCoderLegacy extends TestRSRawCoderBase {
+public class TestRSLegacyRawCoder extends TestRSRawCoderBase {
 
   @Before
   public void setup() {
-    this.encoderClass = RSRawEncoderLegacy.class;
-    this.decoderClass = RSRawDecoderLegacy.class;
+    this.encoderFactoryClass = RSLegacyRawErasureCoderFactory.class;
+    this.decoderFactoryClass = RSLegacyRawErasureCoderFactory.class;
     setAllowDump(false); // Change to true to allow verbose dump for debugging
   }
 }
